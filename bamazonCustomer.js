@@ -52,6 +52,26 @@ function getQtyPromise(id) {
       });
 }
 
+function summarizeOrder(id, orderQty) {
+
+    console.log("Summarizing order...\n");
+    var query = connection.query("SELECT * FROM products Where ?",
+    {
+        item_id: id
+    }, function(err, res) {
+        // if (err) throw err;
+            // Log all results of the SELECT statement
+        var cost = parseFloat(res[0].price)*parseFloat(orderQty);
+        console.log('You purchased ' + orderQty + ' of product ' + '"' + res[0].product_name + '"' + " for $" + cost);
+        }
+    );
+    // console.log(query.sql);
+
+    connection.end();
+
+}
+
+//TODO: Add a summary of the customers purchase.
 function buyProduct() {
     inquirer
     .prompt([
@@ -69,11 +89,17 @@ function buyProduct() {
     .then(function(answer) {
 
         getQtyPromise(answer.id).then((result) =>{
-            if(result >= parseInt(answer.id)) {
+            if(result >= parseInt(answer.qty)) {
                 var newQty = result - parseInt(answer.qty);
                 updateProduct(answer.id,newQty);
-                readProducts();
+                readProducts().then((result) => {
+                    summarizeOrder(answer.id,answer.qty);
+                });
+
                 
+            } else {
+                console.log("There are not enough in stock.");
+                buyProduct();
             }
         });
         
@@ -112,7 +138,6 @@ function updateProduct(id, qty) {
       }
     ],
     function(err, res) {
-    connection.end();
     }
   );
 
