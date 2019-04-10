@@ -33,10 +33,6 @@ connection.connect(function(err) {
   });
   
 });
-    // getQtyPromise(answer.id).then((result) =>{  
-    // });
-
- 
 
 //Promise function
 function getQtyPromise(id) {
@@ -72,51 +68,17 @@ function buyProduct() {
     ])
     .then(function(answer) {
 
-        // console.log("Answer below:");
-        // console.log(answer);
         getQtyPromise(answer.id).then((result) =>{
             if(result >= parseInt(answer.id)) {
                 var newQty = result - parseInt(answer.qty);
-                console.log("id: " + answer.id);
-                console.log("New Quantity: " + newQty);
                 updateProduct(answer.id,newQty);
                 readProducts();
                 
             }
         });
-        // console.log(currentQty);
-        // if(currentQty >= parseInt(answer.qty)) {
-        //     console.log("There's enough left");
-        // }
-        // getQuantity(answer.id).then(function(response) {
-        //     console.log("Success!", response);
-        // })
-        // if(parseInt(getQuantity(answer.id)) > parseInt(answer.qty)){
-        //     console.log("hi")
-        // }
         
     })
 }
-
-//does not close the connection
-// function getQuantity(id) {
-
-//     return new Promise(function(resolve, reject) {
-//         // console.log("Selecting all products...\n");
-        // connection.query("SELECT stock_quantity FROM products WHERE ?",
-        // {
-        //     item_id: id
-        // }, function(err, res) {
-        //   if (err) {
-        //       reject(Error(err));
-        //   } else {
-        //       resolve(res[0].stock_quantity);
-        //   }
-        
-        // });
-
-//     }
-// }
 
 function createProduct() {
   console.log("Inserting a new product...\n");
@@ -139,7 +101,6 @@ function createProduct() {
 }
 
 function updateProduct(id, qty) {
-  console.log("Updating all Rocky Road quantities...\n");
   var query = connection.query(
     "UPDATE products SET ? WHERE ?",
     [
@@ -151,13 +112,6 @@ function updateProduct(id, qty) {
       }
     ],
     function(err, res) {
-        console.log("Full response");
-        console.log(res); 
-        console.log(res.affectedRows);
-        console.log(err);
-    //   readProducts();
-      // Call deleteProduct AFTER the UPDATE completes
-    //   deleteProduct();
     connection.end();
     }
   );
@@ -209,21 +163,4 @@ function readProducts() {
             
         });
     })
-}
-
-function getQtyPromise(id) {
-    return new Promise(function(resolve, reject) {
-        //Do a thing, possibly async, then…
-        connection.query("SELECT stock_quantity FROM products WHERE ?",
-        {
-            item_id: id
-        }, function(err, res) {
-          if (err) {
-              reject(Error(err));
-          } else {
-              resolve(res[0].stock_quantity);
-          }
-        
-        });
-      });
 }
