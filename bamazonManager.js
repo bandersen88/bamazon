@@ -44,6 +44,10 @@ function inquirerLoop() {
                 break;
             case "Add to Inventory":
                 addToInventory().then((result) => inquirerContinue());
+                break;
+            case "Add New Product":
+                addNewProduct().then((result) => inquirerContinue());
+                break;
         }
 
         
@@ -67,6 +71,60 @@ function inquirerContinue() {
                 process.exit();
             }
         })
+}
+
+function addNewProduct() {
+
+    // console.log("and here");
+    return new Promise(function(resolve, reject) {
+       
+        // console.log("also here");
+        inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "name",
+                message: "Enter the product name"
+            },
+            {
+                type: "input",
+                name: "department",
+                message: "Enter the department name"
+            },
+            {
+                type: "input",
+                name: "price",
+                message: "Enter the product price"
+            },
+            {
+                type: "input",
+                name: "stock_qty",
+                message: "Enter the stock quantity"
+            }
+        ])
+        .then(function(answer) {
+            // console.log("I am here");
+            // console.log(answer);
+            connection.query("INSERT INTO products SET ?",
+            {
+                product_name: answer.name,
+                department_name: answer.department,
+                price: answer.price,
+                stock_quantity: answer.stock_qty
+
+            }, function(err, res) {
+                if (err) {
+                    reject(Error(err));
+                } else {
+                    console.log("You're item has been added to inventory");
+                }
+    
+                resolve("success");
+                
+            });
+        })
+        
+    })
 }
 
 function addToInventory() {
