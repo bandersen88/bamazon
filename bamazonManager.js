@@ -42,6 +42,8 @@ function inquirerLoop() {
             case "View Low Inventory":
                 viewLowInventory().then((result) => inquirerContinue());
                 break;
+            case "Add to Inventory":
+                addToInventory().then((result) => inquirerContinue());
         }
 
         
@@ -67,10 +69,120 @@ function inquirerContinue() {
         })
 }
 
+function addToInventory() {
+
+    return new Promise(function(resolve, reject) {
+
+        viewProducts().then((result) => {
+            getProductNameList().then((result) => {
+                var choiceArray = [];
+                result.forEach(function(element) {
+                    choiceArray.push(element[0]);
+                })
+                inquirer
+                .prompt([
+                    {
+                        type: "list",
+                        name: "productName",
+                        message: "Select an item to add inventory to",
+                        choices: choiceArray
+                    }
+                ])
+                .then(function(answer) {
+
+                    inquirer
+                    .prompt([
+                        {
+                            type: "input",
+                            name: "amount",
+                            message: "Enter the amount of inventory you'd like to add (integer only)"
+                        }
+                    ])
+                    .then(function(answer2) {
+
+                        addInventoryToProduct(answer.productName, answer2.amount).then((result) => inquirerContinue());
+                    })
+                    
+                });
+        })
+    })
+        
+    })
+}
+
+function addInventoryToProduct(productName, addToQuantity) {
+
+    return new Promise(function(resolve, reject) {
+
+        var currentQty = 0;
+        var updateQuantity = 0;
+
+        connection.query("SELECT stock_quantity FROM products WHERE ?",
+        {
+            product_name: productName
+        }, function(err, res) {
+            if (err) {
+                reject(Error(err));
+            } else {
+                currentQty = parseInt(res[0].stock_quantity);
+                updateQuantity = currentQty + parseInt(addToQuantity);
+                console.log(updateQuantity);
+                connection.query("UPDATE products SET ? WHERE ?",
+                [
+                  {
+                    stock_quantity: updateQuantity
+                  },
+                  {
+                    product_name: productName
+                  }
+                ],
+                function(err, res) {
+                    if (err) {
+                        reject(Error(err));
+                    } else {
+                        resolve("success");
+                    }                    
+                });
+            }
+        });
+       
+
+    })
+}
+
+
+function getProductNameList() {
+
+    return new Promise(function(resolve, reject) {
+       
+        connection.query("SELECT product_name FROM products", function(err, res) {
+            if (err) {
+                reject(Error(err));
+            } else {
+                // Log all results of the SELECT statement
+            var namesArray = [];
+            // console.log("Response");
+            // console.log(res);
+            res.forEach(function(r) {
+                namesArray.push(
+                    [r.product_name]
+                );
+            })
+            
+            }
+
+            resolve(namesArray);
+            
+        });
+    })
+}
+
+
+
 function viewLowInventory() {
 
     return new Promise(function(resolve, reject) {
-        console.log("Selecting all products...\n");
+        console.log("Selecting low inventory products...\n");
         connection.query("SELECT * FROM products WHERE stock_quantity < 5", function(err, res) {
             if (err) {
                 reject(Error(err));
