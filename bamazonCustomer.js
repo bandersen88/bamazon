@@ -1,8 +1,9 @@
 //TODO: How should connection closing/opening be handled
-//TODO: How do I properly set up promises?  Each db operation should be promise based.
 //TODO: Try to get some Sequelize/formal sql writing in here
 //TODO: put the crud functions off in another module
 //TODO: add a store resest button that resets all the quantities
+
+//TODO: updated product sales when buying an item
 
 var mysql = require("mysql");
 var Table = require('cli-table');
