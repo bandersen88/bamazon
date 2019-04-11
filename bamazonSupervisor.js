@@ -22,7 +22,6 @@ connection.connect(function(err) {
         inquirerLoop();    
   });
 
-
   function inquirerLoop() {
     inquirer
     .prompt([
@@ -43,7 +42,6 @@ connection.connect(function(err) {
                 createNewDepartment().then((result) => inquirerContinue());
                 break;
         }
-    
     })
 }
 
@@ -67,12 +65,49 @@ function inquirerContinue() {
 }
 
 
+function createNewDepartment() {
+
+    return new Promise(function(resolve, reject) {
+       
+        inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "department",
+                message: "Enter the department name"
+            },
+            {
+                type: "input",
+                name: "overhead",
+                message: "Enter the overhead costs"
+            }
+        ])
+        .then(function(answer) {
+            connection.query("INSERT INTO departments SET ?",
+            {
+                department_name: answer.department,
+                over_head_costs: answer.overhead
+            }, function(err, res) {
+                if (err) {
+                    reject(Error(err));
+                } else {
+                    console.log("New Department Added");
+                }
+    
+                resolve("success");
+                
+            });
+        })
+        
+    })
+}
+
 //Simple Group by Read oughta do it
 function viewProductSales() {
 
     return new Promise(function(resolve, reject) {
         console.log("Selecting all products...\n");
-        connection.query("SELECT department_name, product_sales FROM products GROUP BY department_name", function(err, res) {
+        connection.query("SELECT * FROM products JOIN departments ON products.department_name = departments.department_name GROUP BY department_name", function(err, res) {
             if (err) {
                 reject(Error(err));
             } else {
@@ -81,13 +116,14 @@ function viewProductSales() {
                 colWidths: [20, 10]
             });
 
-            res.forEach(function(r) {
-                table.push(
-                    [r.department_name, r.product_sales]
-                );
-            })
+            console.log(res);
+            // res.forEach(function(r) {
+            //     table.push(
+            //         [r.department_name, r.product_sales]
+            //     );
+            // })
             
-            console.log(table.toString());
+            // console.log(table.toString());
             // connection.end();
             }
 
