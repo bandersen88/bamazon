@@ -230,7 +230,6 @@ function getProductNameList() {
             })
             
             }
-
             resolve(namesArray);
             
         });

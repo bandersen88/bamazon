@@ -39,14 +39,14 @@ connection.connect(function(err) {
 function getQtyPromise(id) {
     return new Promise(function(resolve, reject) {
         //Do a thing, possibly async, then…
-        connection.query("SELECT stock_quantity FROM products WHERE ?",
+        connection.query("SELECT stock_quantity, price, product_sales FROM products WHERE ?",
         {
             item_id: id
         }, function(err, res) {
           if (err) {
               reject(Error(err));
           } else {
-              resolve(res[0].stock_quantity);
+              resolve(res[0]);
           }
         
         });
@@ -90,9 +90,13 @@ function buyProduct() {
     .then(function(answer) {
 
         getQtyPromise(answer.id).then((result) =>{
-            if(result >= parseInt(answer.qty)) {
-                var newQty = result - parseInt(answer.qty);
-                updateProduct(answer.id,newQty);
+            console.log(result)
+            if(result.stock_quantity >= parseInt(answer.qty)) {
+                var newQty = result.stock_quantity - parseInt(answer.qty);
+                var cost = parseInt(answer.qty)*result.price;
+                var sales = result.product_sales+cost;
+                console.log("Cost: $" +cost);
+                updateProduct(answer.id,newQty,sales);
                 readProducts().then((result) => {
                     summarizeOrder(answer.id,answer.qty);
                 });
@@ -107,32 +111,13 @@ function buyProduct() {
     })
 }
 
-function createProduct() {
-  console.log("Inserting a new product...\n");
-  var query = connection.query(
-    "INSERT INTO products SET ?",
-    {
-      flavor: "Rocky Road",
-      price: 3.0,
-      quantity: 50
-    },
-    function(err, res) {
-      console.log(res.affectedRows + " product inserted!\n");
-      // Call updateProduct AFTER the INSERT completes
-    //   updateProduct();
-    }
-  );
-
-  // logs the actual query being run
-  console.log(query.sql);
-}
-
-function updateProduct(id, qty) {
+function updateProduct(id, qty,sales) {
   var query = connection.query(
     "UPDATE products SET ? WHERE ?",
     [
       {
-        stock_quantity: qty
+        stock_quantity: qty,
+        product_sales: sales,
       },
       {
         item_id: id
@@ -144,21 +129,6 @@ function updateProduct(id, qty) {
 
   // logs the actual query being run
   console.log(query.sql);
-}
-
-function deleteProduct() {
-  console.log("Deleting all strawberry icecream...\n");
-  connection.query(
-    "DELETE FROM products WHERE ?",
-    {
-      flavor: "strawberry"
-    },
-    function(err, res) {
-      console.log(res.affectedRows + " products deleted!\n");
-      // Call readProducts AFTER the DELETE completes
-    //   readProducts();
-    }
-  );
 }
 
 function readProducts() {

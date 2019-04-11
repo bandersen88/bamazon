@@ -107,23 +107,25 @@ function viewProductSales() {
 
     return new Promise(function(resolve, reject) {
         console.log("Selecting all products...\n");
-        connection.query("SELECT * FROM products JOIN departments ON products.department_name = departments.department_name GROUP BY department_name", function(err, res) {
+        connection.query("SELECT department_id, products.department_name, over_head_costs, SUM(product_sales) as product_sales FROM products JOIN departments ON products.department_name = departments.department_name GROUP BY products.department_name", function(err, res) {
             if (err) {
                 reject(Error(err));
             } else {
             var table = new Table({
-                head: ['Department', 'Product Sales'],
-                colWidths: [20, 10]
+                head: ['Dept. ID', 'Department Name','Over Head Costs','Product Sales','Total Profit'],
+                colWidths: [10, 20, 20, 15,15]
             });
 
-            console.log(res);
-            // res.forEach(function(r) {
-            //     table.push(
-            //         [r.department_name, r.product_sales]
-            //     );
-            // })
+            var totalSales = [];
+
+            res.forEach(function(r,index) {
+                totalSales.push(r.product_sales - r.over_head_costs);
+                table.push(
+                    [r.department_id, r.department_name,r.over_head_costs,r.product_sales,totalSales[index]]
+                );
+            })
             
-            // console.log(table.toString());
+            console.log(table.toString());
             // connection.end();
             }
 
