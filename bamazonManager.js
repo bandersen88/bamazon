@@ -20,8 +20,6 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err) {
     if (err) throw err;
-    console.log("connected as id " + connection.threadId + "\n");
-    //Need a promise to start buy product, so that buy product waits.
         inquirerLoop();    
   });
 
@@ -77,10 +75,8 @@ function inquirerContinue() {
 
 function addNewProduct() {
 
-    // console.log("and here");
     return new Promise(function(resolve, reject) {
        
-        // console.log("also here");
         inquirer
         .prompt([
             {
@@ -105,8 +101,7 @@ function addNewProduct() {
             }
         ])
         .then(function(answer) {
-            // console.log("I am here");
-            // console.log(answer);
+            
             connection.query("INSERT INTO products SET ?",
             {
                 product_name: answer.name,
