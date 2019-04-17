@@ -27,7 +27,7 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err) {
   if (err) throw err;
-  console.log("connected as id " + connection.threadId + "\n");
+//   console.log("connected as id " + connection.threadId + "\n");
   //Need a promise to start buy product, so that buy product waits.
   readProducts().then((result) => {
     buyProduct();
@@ -90,7 +90,7 @@ function buyProduct() {
     .then(function(answer) {
 
         getQtyPromise(answer.id).then((result) =>{
-            console.log(result)
+            // console.log(result)
             if(result.stock_quantity >= parseInt(answer.qty)) {
                 var newQty = result.stock_quantity - parseInt(answer.qty);
                 var cost = parseInt(answer.qty)*result.price;
